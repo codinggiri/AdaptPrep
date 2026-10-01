@@ -1,0 +1,144 @@
+/* Naya Google Font 'Inter' jo modern tech apps (like Vercel, Stripe) use karti hain */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Energetic Gradient Background */
+body {
+  background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+  color: #1e293b;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* Card with Entry Animation */
+.card {
+  background: white;
+  padding: 45px 40px;
+  border-radius: 16px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+  width: 100%;
+  max-width: 450px;
+  margin: 20px;
+  border-top: 5px solid #3b82f6; /* Blue accent line on top */
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dashboard-card {
+  max-width: 700px; /* Interview page thoda chouda hona chahiye */
+}
+
+/* Smooth Slide-up and Fade-in Animation */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card h2 {
+  text-align: center;
+  margin-bottom: 8px;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 24px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #64748b;
+  margin-bottom: 25px;
+  font-size: 14px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+input {
+  padding: 14px 16px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  background-color: #f8fafc;
+}
+
+input:focus {
+  border-color: #3b82f6;
+  background-color: white;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+/* Motivating Action Buttons */
+button {
+  padding: 15px;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.4);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Interview Dashboard Specifics */
+.question-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 25px;
+  border-radius: 12px;
+  margin: 20px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.question-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: #10b981; /* Green accent for questions */
+}
+
+.tag {
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 15px;
+}
+
+.btn-success { background: linear-gradient(to right, #10b981, #059669); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+.btn-success:hover { box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); }
+
+.btn-danger { background: linear-gradient(to right, #f43f5e, #e11d48); box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3); }
+.btn-danger:hover { box-shadow: 0 6px 15px rgba(244, 63, 94, 0.4); }
+
+.action-row {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+.action-row button { flex: 1; }
