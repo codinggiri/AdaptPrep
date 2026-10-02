@@ -1,55 +1,6 @@
-// export default function Register() {
-//   return <h2>Register Page</h2>;
-// }
-
-
-// import { useState } from 'react';
-// import axios from 'axios';
-// import { useNavigate, Link } from 'react-router-dom';
-
-// export default function Register() {
-//   const [name, setName] = useState('');
-//   const [email, setEmail] = useState('');
-//   const [password, setPassword] = useState('');
-//   const navigate = useNavigate();
-
-//   const handleRegister = async (e) => {
-//     e.preventDefault(); // Page refresh hone se rokta hai
-//     try {
-//       const response = await axios.post('http://localhost:5000/api/auth/register', {
-//         name,
-//         email,
-//         password
-//       });
-//       alert(response.data.message); // Success message
-//       navigate('/login'); // Register hote hi login page par bhej dega
-//     } catch (error) {
-//       alert(error.response?.data?.error || 'Registration failed');
-//     }
-//   };
-
-//   return (
-//     <div style={{ padding: '50px', maxWidth: '400px', margin: 'auto' }}>
-//       <h2>Create an Account</h2>
-//       <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-//         <input type="text" placeholder="Full Name" value={name} onChange={(e) => setName(e.target.value)} required />
-//         <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-//         <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-//         <button type="submit" style={{ padding: '10px', backgroundColor: '#007bff', color: 'white', border: 'none' }}>
-//           Register
-//         </button>
-//       </form>
-//       <p>Already have an account? <Link to="/login">Login here</Link></p>
-//     </div>
-//   );
-// }
-
-
-
-
 import { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import apiClient from '../api/apiClient';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -60,12 +11,17 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault(); 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', { name, email, password });
+      await apiClient.post('/api/auth/register', { name, email, password });
       alert('Welcome to the grind! Your account is ready.'); 
       navigate('/login'); 
     } catch (error) {
       alert(error.response?.data?.error || 'Registration failed');
     }
+  };
+
+  const handleGoogleSignup = () => {
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    window.location.href = `${backendUrl}/api/auth/google`;
   };
 
   return (
@@ -79,8 +35,12 @@ export default function Register() {
         <input type="password" placeholder="Create a strong password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         <button type="submit">Start Preparing Now</button>
 
-        <button type="button" onClick={() => { window.location.href = 'http://localhost:5000/api/auth/google' }} style={{ backgroundColor: '#db4437', color: 'white', marginTop: '15px', width: '100%', padding: '12px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-              Sign up with Google
+        <button 
+          type="button" 
+          onClick={handleGoogleSignup} 
+          style={{ backgroundColor: '#db4437', color: 'white', marginTop: '15px', width: '100%', padding: '12px', borderRadius: '5px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          Sign up with Google
         </button>
       </form>
       

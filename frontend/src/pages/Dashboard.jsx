@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import apiClient from '../api/apiClient';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -16,10 +16,7 @@ export default function Dashboard() {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/interview/history', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
+        const response = await apiClient.get('/api/interview/history');
         setDashboardData(response.data);
       } catch (error) {
         console.error("Dashboard fetch error:", error);
@@ -39,23 +36,18 @@ export default function Dashboard() {
     );
   }
 
-  // --- DYNAMIC CALCULATIONS ---
-  // Agar DB se actual LPA na aaye, toh history ke basis par calculate kar rahe hain
   const solvedCount = dashboardData?.stats?.totalQuestionsSolved || 0;
-  
-  // Base 3.5 LPA. Har solved question par 0.5 LPA increment (Example Logic)
   const currentLPA = 3.5 + (solvedCount * 0.5);
 
-  // Tier setup based on Indian Tech Placement standards
   let currentTier = "Service Based";
-  let tierColor = "#64748b"; // Greyish
+  let tierColor = "#64748b";
   
   if (currentLPA >= 15) {
     currentTier = "FAANG / HFT";
-    tierColor = "#8b5cf6"; // Purple
+    tierColor = "#8b5cf6";
   } else if (currentLPA >= 7) {
     currentTier = "Product Based";
-    tierColor = "#f59e0b"; // Orange
+    tierColor = "#f59e0b";
   }
 
   return (
@@ -73,7 +65,6 @@ export default function Dashboard() {
         </button>
       </header>
       
-      {/* 3 Main Stat Cards */}
       <div style={{ display: 'flex', gap: '20px', marginBottom: '40px' }}>
         <div style={{ flex: 1, padding: '25px', background: '#fff', borderRadius: '12px', border: `2px solid ${tierColor}`, textAlign: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h3 style={{ margin: '0 0 10px 0', color: '#64748b', fontSize: '16px', textTransform: 'uppercase' }}>Current Tier</h3>
@@ -97,12 +88,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Real History Section */}
       <h3 style={{ color: '#1e293b', borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>📜 Recent Interview Activity</h3>
       
       {dashboardData?.history && dashboardData.history.length > 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
-          {/* Latest questions upar dikhane ke liye reverse kar rahe hain */}
           {[...dashboardData.history].reverse().map((item, index) => (
             <div key={index} style={{ background: '#fff', padding: '20px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>

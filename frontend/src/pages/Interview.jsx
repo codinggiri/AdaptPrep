@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
+import apiClient from '../api/apiClient';
 
 const boilerplate = {
   javascript: '// Write your optimized code here...\n\nfunction solve() {\n  \n}',
@@ -16,9 +15,7 @@ export default function Interview() {
   const [hintsUsed, setHintsUsed] = useState(0);
   const [errorMsg, setErrorMsg] = useState(''); 
   
-  // 🔄 NAYA STATE: Round Type
-  const [roundType, setRoundType] = useState('coding'); // 'coding' or 'behavioral'
-  
+  const [roundType, setRoundType] = useState('coding');
   const [language, setLanguage] = useState('javascript');
   const [code, setCode] = useState(boilerplate['javascript']); 
   
@@ -31,25 +28,22 @@ export default function Interview() {
 
   const navigate = useNavigate();
 
-  // 1. BUG 1 FIX: Missing Language Change Handler
   const handleLanguageChange = (e) => {
     const selectedLang = e.target.value;
     setLanguage(selectedLang);
     setCode(boilerplate[selectedLang] || '');
   };
 
-  // 2. BUG 2 FIX: Google OAuth Token Extraction & Clean URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const tokenFromUrl = params.get('token');
     
     if (tokenFromUrl) {
       localStorage.setItem('token', tokenFromUrl);
-      // URL se token hata do taaki refresh karne par issue na aaye
       window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    startInterview("Data Structures"); // Default topic
+    startInterview("Data Structures");
   }, []);
 
   const startInterview = async (selectedTopic) => {
@@ -60,10 +54,10 @@ export default function Interview() {
       setQuestion(null);
       setAiFeedback(null);
       
-      const response = await axios.post('http://localhost:5000/api/interview/next-question', 
-        { topic: selectedTopic, previousAnswerContext: "" }, 
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await apiClient.post('/api/interview/next-question', {
+        topic: selectedTopic,
+        previousAnswerContext: ""
+      });
       
       setQuestion({
         text: response.data.questionText,
@@ -83,7 +77,7 @@ export default function Interview() {
 
   const handleRoundChange = (type) => {
     setRoundType(type);
-    if(type === 'behavioral') {
+    if (type === 'behavioral') {
       startInterview("Behavioral & Leadership");
     } else {
       startInterview("Data Structures");
@@ -119,20 +113,16 @@ export default function Interview() {
   const handleSubmit = async () => {
     setIsEvaluating(true);
     
-    // Agar coding round hai toh Code bhejo, warna sirf Voice explanation bhejo
     const finalAnswer = roundType === 'coding' 
       ? `CODE:\n${code}` 
       : `VERBAL ANSWER:\n${verbalAnswer}`;
 
     try {
-      const token = localStorage.getItem('token');
-      const evalResponse = await axios.post('http://localhost:5000/api/interview/evaluate', {
+      const evalResponse = await apiClient.post('/api/interview/evaluate', {
         topic: question.topic,
         questionText: question.text,
         userAnswer: finalAnswer, 
         language: roundType === 'coding' ? language : 'spoken-english'
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
       });
       
       setAiFeedback(evalResponse.data.evaluation);
@@ -143,24 +133,33 @@ export default function Interview() {
     }
   };
 
-  if (!question && !aiFeedback) return (<div style={{ textAlign: 'center', marginTop: '100px' }}><h2 style={{ color: '#3b82f6' }}>AI is preparing the round... 🧠</h2></div>);
-
-  // FEEDBACK SCREEN (Usi tarah rahega)
-  if (aiFeedback) return (
-    <div className="card dashboard-card" style={{ maxWidth: '800px', margin: '20px auto', padding: '30px' }}>
-      <h2 style={{ color: aiFeedback.isCorrect ? '#10b981' : '#ef4444' }}>{aiFeedback.isCorrect ? '✅ Nailed It!' : '❌ Needs Improvement'}</h2>
-      <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', marginTop: '15px', border: '1px solid #e2e8f0' }}>
-        <h4 style={{ color: '#1e293b', marginBottom: '10px' }}>AI Interviewer's Feedback:</h4>
-        <p style={{ lineHeight: '1.6', fontSize: '16px' }}>{aiFeedback.feedback}</p>
+  if (!question && !aiFeedback) {
+    return (
+      <div style={{ textAlign: 'center', marginTop: '100px' }}>
+        <h2 style={{ color: '#3b82f6' }}>AI is preparing the round... 🧠</h2>
       </div>
-      <button className="btn-success" onClick={() => startInterview(question.topic)} style={{ marginTop: '20px', width: '100%', padding: '15px' }}>Next Question 🚀</button>
-    </div>
-  );
+    );
+  }
+
+  if (aiFeedback) {
+    return (
+      <div className="card dashboard-card" style={{ maxWidth: '800px', margin: '20px auto', padding: '30px' }}>
+        <h2 style={{ color: aiFeedback.isCorrect ? '#10b981' : '#ef4444' }}>
+          {aiFeedback.isCorrect ? '✅ Nailed It!' : '❌ Needs Improvement'}
+        </h2>
+        <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', marginTop: '15px', border: '1px solid #e2e8f0' }}>
+          <h4 style={{ color: '#1e293b', marginBottom: '10px' }}>AI Interviewer's Feedback:</h4>
+          <p style={{ lineHeight: '1.6', fontSize: '16px' }}>{aiFeedback.feedback}</p>
+        </div>
+        <button className="btn-success" onClick={() => startInterview(question.topic)} style={{ marginTop: '20px', width: '100%', padding: '15px' }}>
+          Next Question 🚀
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="card dashboard-card" style={{ maxWidth: '1000px', margin: '20px auto' }}>
-      
-      {/* 🔄 NAYA ROUND TOGGLE */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
         <button 
           onClick={() => handleRoundChange('coding')} 
@@ -181,19 +180,20 @@ export default function Interview() {
         <p style={{ fontSize: '18px', fontWeight: '500', marginTop: '10px' }}>{question?.text}</p>
       </div>
 
-      {/* CONDITIONAL RENDERING: Agar Coding round hai tabhi Editor dikhega */}
       {roundType === 'coding' && (
         <div style={{ height: '300px', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', marginBottom: '15px' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', background: '#1e1e1e', padding: '5px' }}>
             <select value={language} onChange={handleLanguageChange} style={{ background: '#333', color: 'white', border: 'none', padding: '5px' }}>
-              <option value="javascript">JavaScript</option><option value="python">Python</option><option value="cpp">C++</option><option value="java">Java</option>
+              <option value="javascript">JavaScript</option>
+              <option value="python">Python</option>
+              <option value="cpp">C++</option>
+              <option value="java">Java</option>
             </select>
           </div>
           <Editor height="100%" language={language} theme="vs-dark" value={code} onChange={setCode} options={{ minimap: { enabled: false } }} />
         </div>
       )}
 
-      {/* CONDITIONAL RENDERING: Agar Behavioral round hai toh bada Voice box dikhega */}
       {roundType === 'behavioral' && (
         <div style={{ marginBottom: '20px', background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '2px dashed #8b5cf6', textAlign: 'center' }}>
           <h3 style={{ color: '#6d28d9', marginBottom: '15px' }}>🎙️ Speak Your Answer</h3>
